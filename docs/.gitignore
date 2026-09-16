@@ -1,0 +1,4 @@
+assets
+en
+*.md
+!index.md
