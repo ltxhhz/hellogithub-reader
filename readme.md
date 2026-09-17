@@ -11,7 +11,7 @@ HelloGitHub Reader 将 [HelloGitHub](https://github.com/521xueweihan/HelloGitHub
 - **📖 完整月刊浏览** — 按期刊顺序组织，支持侧边栏快速跳转。
 - **🔍 本地全文搜索** — 基于 MiniSearch，在浏览器端运行，无需外部搜索服务。
 - **🔑 零 Token 依赖** — 不调用 GitHub API，不受速率限制影响。
-- **📦 纯静态部署** — 构建后仅包含 HTML、CSS、JS，可托管在 GitHub Pages、Netlify、Vercel 等平台。
+- **📦 纯静态部署** — 使用 CDN 模式构建后，可托管在 GitHub Pages、Netlify、Vercel 等平台。
 - **⚡ 轻量快速** — VitePress 默认零 JavaScript 运行时，页面加载极快。
 
 ## 🚀 快速开始
@@ -46,7 +46,10 @@ npm run docs:dev
 
 ### 构建静态站点
 
+确保已经按照上面的本地开发步骤准备好 `source/HelloGitHub` 后，再执行：
+
 ```bash
+node scripts/build.mjs
 npm run docs:build
 ```
 
@@ -60,22 +63,28 @@ npm run docs:preview
 
 ## 📚 内容更新
 
-本站内容来源于 HelloGitHub 官方仓库的 `content/` 目录。重新拉取仓库并构建：
+本站内容来源于 HelloGitHub 官方仓库的 `content/` 目录。已完成本地开发环境配置时，重新拉取仓库并构建：
 
 ```bash
-mkdir source && cd source
-git pull https://github.com/521xueweihan/HelloGitHub.git
-git pull https://github.com/521xueweihan/img_logo.git
-git pull https://github.com/521xueweihan/img.git
-git pull https://github.com/521xueweihan/img2.git
-git pull https://github.com/521xueweihan/img3.git
-git pull https://github.com/521xueweihan/img4.git
-cd ..
+git -C source/HelloGitHub pull --ff-only
+git -C source/img_logo pull --ff-only
+git -C source/img pull --ff-only
+git -C source/img2 pull --ff-only
+git -C source/img3 pull --ff-only
+git -C source/img4 pull --ff-only
 node scripts/build.mjs
 npm run docs:build
 ```
 
-> 如果需要自动化同步，可以编写脚本定期拉取官方仓库内容并重新构建。
+本地构建默认使用本地图片资源。GitHub Pages 和其他不需要本地图片副本的部署环境，使用 jsDelivr 模式：
+
+```bash
+git -C source/HelloGitHub pull --ff-only
+node scripts/build.mjs --resource=jsdelivr
+npm run docs:build
+```
+
+`--resource=jsdelivr` 会将图片地址替换为 `cdn.jsdelivr.net`，图片仓库不需要克隆到本地。资源版本按上游仓库的 `master` 分支使用。
 
 ## 🗂️ 项目结构
 
@@ -88,7 +97,12 @@ npm run docs:build
 │   ├── HelloGitHub02.md       # 第 2 期月刊
 │   └── ...
 ├── package.json
-└── README.md
+├── scripts/
+│   └── build.mjs
+├── .github/
+│   └── workflows/
+│       └── deploy.yml
+└── readme.md
 ```
 
 
@@ -103,23 +117,9 @@ npm run docs:build
 | 平台 | 部署方式 |
 |---|---|
 | GitHub Pages | 使用 GitHub Actions 构建并发布 |
-| Netlify | 连接仓库，构建命令 `npm run docs:build`，发布目录 `docs/.vitepress/dist` |
-| Vercel | 导入仓库，框架预设选择 VitePress，或手动配置输出目录 |
-| 任意静态服务器 | 将 `dist` 目录内容上传至服务器根目录 |
-
-## 🙏 致谢
-
-- [HelloGitHub](https://github.com/521xueweihan/HelloGitHub) — 所有月刊内容的来源，感谢作者及贡献者的持续付出。
-- [VitePress](https://vitepress.dev/) — 优秀的静态站点生成器。
-
-## 📄 License
-
-本项目代码以 [MIT](https://opensource.org/licenses/MIT) 许可发布。  
-月刊内容版权归 HelloGitHub 项目所有，请遵循原项目的许可协议。
-
----
-
-**HelloGitHub Reader** — 让浏览开源月刊回归简单。
+| Netlify | 构建命令 `node scripts/build.mjs --resource=jsdelivr && npm run docs:build`，发布目录 `docs/.vitepress/dist` |
+| Vercel | 构建命令 `node scripts/build.mjs --resource=jsdelivr && npm run docs:build`，输出目录 `docs/.vitepress/dist` |
+| 任意静态服务器 | 将 `docs/.vitepress/dist` 目录内容上传至服务器根目录 |
 
 ## GitHub Actions 自动更新与部署
 
@@ -138,3 +138,17 @@ npm run docs:build
 ```
 
 启用部署前，需要在仓库的 **Settings > Pages** 中将发布来源设置为 **GitHub Actions**。
+
+## 🙏 致谢
+
+- [HelloGitHub](https://github.com/521xueweihan/HelloGitHub) — 所有月刊内容的来源，感谢作者及贡献者的持续付出。
+- [VitePress](https://vitepress.dev/) — 优秀的静态站点生成器。
+
+## 📄 License
+
+本项目代码以 [MIT](https://opensource.org/licenses/MIT) 许可发布。  
+月刊内容版权归 HelloGitHub 项目所有，请遵循原项目的许可协议。
+
+---
+
+**HelloGitHub Reader** — 让浏览开源月刊回归简单。
