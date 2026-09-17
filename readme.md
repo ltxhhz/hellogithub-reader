@@ -102,7 +102,7 @@ npm run docs:build
 
 | 平台 | 部署方式 |
 |---|---|
-| GitHub Pages | 使用 GitHub Actions 构建并推送至 `gh-pages` 分支 |
+| GitHub Pages | 使用 GitHub Actions 构建并发布 |
 | Netlify | 连接仓库，构建命令 `npm run docs:build`，发布目录 `docs/.vitepress/dist` |
 | Vercel | 导入仓库，框架预设选择 VitePress，或手动配置输出目录 |
 | 任意静态服务器 | 将 `dist` 目录内容上传至服务器根目录 |
@@ -120,3 +120,21 @@ npm run docs:build
 ---
 
 **HelloGitHub Reader** — 让浏览开源月刊回归简单。
+
+## GitHub Actions 自动更新与部署
+
+项目已配置 `.github/workflows/deploy.yml`，用于自动拉取最新的 HelloGitHub 内容并部署到 GitHub Pages。
+
+- 每月 28 日 06:00 UTC 自动执行
+- 支持在 GitHub Actions 页面手动触发
+- `main` 分支的站点配置或构建脚本发生变化时自动执行
+- 图片资源使用 jsDelivr CDN，不打包进 Pages 构建产物
+
+GitHub Pages 构建使用：
+
+```bash
+node scripts/build.mjs --resource=jsdelivr
+npm run docs:build
+```
+
+启用部署前，需要在仓库的 **Settings > Pages** 中将发布来源设置为 **GitHub Actions**。

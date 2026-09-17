@@ -11,12 +11,30 @@ const root = path.join(__dirname, '..')
 const outDir = path.join(root, 'docs')
 const assetOutDir = path.join(root, 'docs/assets')
 
+const resourceSource = getArgumentValue('--resource') ?? 'local'
+
+if (!['local', 'jsdelivr'].includes(resourceSource)) {
+  throw new Error(`Unsupported resource source: ${resourceSource}`)
+}
+
+const resourceReplaceDict = resourceSource === 'jsdelivr'
+  ? [
+      ['https://raw.githubusercontent.com/521xueweihan/img_logo/master/', 'https://cdn.jsdelivr.net/gh/521xueweihan/img_logo@master/'],
+      ['https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/', 'https://cdn.jsdelivr.net/gh/521xueweihan/img@master/hellogithub/'],
+      ['https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/', 'https://cdn.jsdelivr.net/gh/521xueweihan/img2@master/hellogithub/'],
+      ['https://raw.githubusercontent.com/521xueweihan/img3/master/hellogithub/', 'https://cdn.jsdelivr.net/gh/521xueweihan/img3@master/hellogithub/'],
+      ['https://raw.githubusercontent.com/521xueweihan/img4/master/hellogithub/', 'https://cdn.jsdelivr.net/gh/521xueweihan/img4@master/hellogithub/']
+    ]
+  : [
+      ['https://raw.githubusercontent.com/521xueweihan/img_logo/master/', '/assets/'],
+      ['https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/', '/assets/img/'],
+      ['https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/', '/assets/img2/'],
+      ['https://raw.githubusercontent.com/521xueweihan/img3/master/hellogithub/', '/assets/img3/'],
+      ['https://raw.githubusercontent.com/521xueweihan/img4/master/hellogithub/', '/assets/img4/']
+    ]
+
 const replaceDict = [
-  ['https://raw.githubusercontent.com/521xueweihan/img_logo/master/', '/assets/'],
-  ['https://raw.githubusercontent.com/521xueweihan/img/master/hellogithub/', '/assets/img/'],
-  ['https://raw.githubusercontent.com/521xueweihan/img2/master/hellogithub/', '/assets/img2/'],
-  ['https://raw.githubusercontent.com/521xueweihan/img3/master/hellogithub/', '/assets/img3/'],
-  ['https://raw.githubusercontent.com/521xueweihan/img4/master/hellogithub/', '/assets/img4/'],
+  ...resourceReplaceDict,
   ['https://hellogithub.com/periodical/statistics/click?target=', ''],
   [/https:\/\/github\.com\/521xueweihan\/HelloGitHub\/blob\/master([/\w]+)\.md/g, '$1'],
   [/^(\d+、)/gm, '#### $1'],
@@ -65,6 +83,10 @@ async function processMarkdown(file) {
 }
 
 async function processAssets() {
+  if (resourceSource !== 'local') {
+    return
+  }
+
   await Promise.all(assetMap.map(([source, target]) => syncDirectory(
     path.join(root, source),
     path.join(assetOutDir, target)
@@ -151,9 +173,15 @@ function shouldCopyFile(sourceStat, targetStat) {
     sourceStat.mtimeMs > targetStat.mtimeMs
 }
 
-await fs.mkdir(path.join(outDir, 'en'), { recursive: true })
-await fs.mkdir(assetOutDir, { recursive: true })
+function getArgumentValue(name) {
+  const argument = process.argv.find(value => value.startsWith(`${name}=`))
+  return argument?.slice(name.length + 1)
+}
 
+await fs.mkdir(path.join(outDir, 'en'), { recursive: true })
+if (resourceSource === 'local') {
+  await fs.mkdir(assetOutDir, { recursive: true })
+}
 await processAssets()
 
 await Promise.all([...contentList.map(e => processMarkdown(path.join(contentDir, e))), ...contentListEn.map(e => processMarkdown(path.join(contentDir, 'en', e)))])
