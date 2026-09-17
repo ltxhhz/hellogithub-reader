@@ -6,6 +6,8 @@
 
 HelloGitHub Reader 将 [HelloGitHub](https://github.com/521xueweihan/HelloGitHub) 月刊的 Markdown 内容通过 [VitePress](https://vitepress.dev/) 构建为纯静态站点。你可以在浏览器中流畅地浏览每一期月刊，并使用本地全文搜索快速定位感兴趣的开源项目。整个项目无后端、无数据库、无需任何 Token，构建产物可直接部署到任意静态托管服务。
 
+![](./image.png)
+
 ## ✨ 特性
 
 - **📖 完整月刊浏览** — 按期刊顺序组织，支持侧边栏快速跳转。
